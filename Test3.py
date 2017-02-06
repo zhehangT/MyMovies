@@ -3,13 +3,29 @@
 # Author : t_zhehang
 # Data : 17-1-19
 
-from bs4 import BeautifulSoup
-import urllib2
+import difflib
 
-# url = r'https://movie.douban.com/subject/25934014/awards/'
-# html = urllib2.urlopen(url).read()
 
-html = open('test.html').read()
-soup = BeautifulSoup(html, "html.parser")
+def get_only_chinese(check_str):
+    result = ""
+    for ch in check_str:
+        if u'\u4e00' <= ch <= u'\u9fff':
+            result += ch
+    return result
 
-print(soup.prettify())
+
+t = u'史蒂夫.乔布斯.机器人生'
+s1 = u'史蒂夫·乔布斯'
+s2 = u'史蒂夫·乔布斯：机器人生'
+s3 = u'iGenius：史蒂夫·乔布斯是如何改变世界的'
+
+ss = [s1, s2, s3]
+
+t= get_only_chinese(t)
+for s in ss:
+    s = get_only_chinese(s)
+    seq = difflib.SequenceMatcher(None, t, s)
+    print seq.ratio()
+
+
+
