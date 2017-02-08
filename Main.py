@@ -12,8 +12,8 @@ movieRoot = "E:" + s + u"电影" + s
 if __name__ == "__main__":
 
     movieManager = MovieManager()
-    movieManager.getMovieFileNames(movieRoot)
-    movieManager.save_to_file(movieRoot)
+    movieManager.getMovieFromFileNames(movieRoot)
+    movieManager.saveToFile(movieRoot)
 
 
     print("\nGet All Movie File Names")

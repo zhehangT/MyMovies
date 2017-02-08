@@ -1,16 +1,12 @@
 # ---coding:utf-8---
 
-import json
+import cPickle
 
-a = open(u"E:\电影\一个叫欧维的男人决定去死\一个叫欧维的男人决定去死.json").read()
-hjson = json.loads(a)
-actors = ""
-for d in hjson["casts"]:
-    if actors == "":
-        actors = d["name"]
-    else:
-        actors = actors + "/" + d["name"]
 
-print(actors)
 
-print(hjson["rating"]["average"])
+f2 = open("moviesNotFound.pkl", "rb")
+p2 = cPickle.load(f2)
+
+
+
+print p2

@@ -5,10 +5,9 @@
 
 from __future__ import division
 from Movie import Movie
-from DoubanManager import DoubanManager
+from DoubanApiManager import DoubanApiManager
 import os
 import string
-import json
 import pandas as pd
 movieSizeFilter = 0.1
 
@@ -17,12 +16,11 @@ class MovieManager:
 
 
     def __init__(self):
-        self.doubanManager = DoubanManager()
+        self.doubanManager = DoubanApiManager()
         self.movies = []
-        self.moviesNotFound = ["小羊肖恩第一季", "小羊肖恩第二季", "大师",  "硬核亨利", "罪恶之城", "采访"]
 
 
-    def getMovieFileNames(self, root):
+    def getMovieFromFileNames(self, root):
 
         for i in os.listdir(root):
             temp = os.path.join(root, i)
@@ -50,21 +48,23 @@ class MovieManager:
                             resolution = temp[j]
 
                     movie = Movie(name, year)
-                    movie.setFileInfo(source, resolution, publish, fileType, fileSize)
+                    movie.setFileInfo(source, resolution, publish, fileType, str(fileSize)+"G")
 
+                    print("正在处理 " + str(len(self.movies)) + ":" + name.encode(encoding="UTF-8"))
+                    doubanInfo = self.doubanManager.getDoubanInfoFromNameAndYear(root, name, year)
 
-                    doubanInfo = self.get_douban_info(root, name, year)
-
-                    movie.setDoubanInfo(doubanInfo[0], doubanInfo[1], doubanInfo[2], doubanInfo[3], doubanInfo[4])
+                    movie.setDoubanInfo(doubanInfo[0], doubanInfo[1], doubanInfo[2], doubanInfo[3],
+                                        doubanInfo[4], doubanInfo[5], doubanInfo[6], doubanInfo[7])
 
                     self.movies.append(movie)
 
 
                     # print(name+ " " + year + " " + source + " " + resolution + " " + publish + " " + fileType + " " + str(fileSize) + "G"  )
             else:
-                self.getMovieFileNames(temp)
+                self.getMovieFromFileNames(temp)
 
 
+    # 判断字符串是否全部为中文字符(提取电影的中文名)
     def check_contain_chinese(self, check_str):
 
         for ch in check_str:
@@ -72,7 +72,7 @@ class MovieManager:
                 return True
         return False
 
-
+    # 判断字符串是否为数字(提取电影的年份)
     def check_is_digit(self, check_str):
 
         nums = string.digits
@@ -81,13 +81,15 @@ class MovieManager:
                 return False
         return True
 
+    # 提取电影的片源
     def check_source(self, check_str):
 
-        source = ["bluray", "hdtv", "dvd", "dvdrip", "dvdscr", "web-dl" ,"bdrip", "brrip", "d9"]
+        source = ["bluray", "hdtv" ,"hdrip", "dvd", "dvdrip", "dvdscr", "web-dl" ,"bdrip", "brrip", "d9", "d5"]
         if check_str.lower() in source:
             return True
         return False
 
+    # 提取电影的发布方
     def get_publish(self, publish):
 
         i = publish.find("-")
@@ -98,69 +100,15 @@ class MovieManager:
         else:
             return "Unknown"
 
-    def get_douban_info(self, root, name, year):
-        print("正在处理 " + str(len(self.movies)) + ":" + name.encode(encoding="UTF-8"))
+    # 保存电影信息为csv文件
+    def saveToFile(self, root):
 
-        if name.encode(encoding="UTF-8") not in self.moviesNotFound:
-
-            if os.path.exists(os.path.join(root, name + ".json")):
-                html = open(os.path.join(root, name + ".json")).read()
-                hjson = json.loads(html)
-
-                if not hjson["year"] == year.encode(encoding="UTF-8"):
-
-                    html = self.get_dioubanInfoJson(root, name, year)
-                    hjson = json.loads(html)
-
-            else:
-
-                html = self.get_dioubanInfoJson(root, name, year)
-                hjson = json.loads(html)
-
-            directors = ""
-            for d in hjson["directors"]:
-                if directors == "":
-                    directors = d["name"]
-                else:
-                    directors = directors + "/" + d["name"]
-
-            actors = ""
-            for d in hjson["casts"]:
-                if actors == "":
-                    actors = d["name"]
-                else:
-                    actors = actors + "/" + d["name"]
-
-            rating = hjson["rating"]["average"]
-            ratings_count = hjson["ratings_count"]
-            alt = hjson["alt"]
-            return [directors, actors, rating, ratings_count, alt]
-
-
-
-        return ["", "", "", "", ""]
-
-
-    def get_dioubanInfoJson(self, root, name, year):
-
-        html = self.doubanManager.getJsonInfoFromNameAndYear(name, year)
-
-        if html != "":
-            output = open(os.path.join(root, name + ".json"), "w")
-            output.write(html)
-            output.close()
-
-        return html
-
-
-
-
-    def save_to_file(self, root):
+        self.doubanManager.saveMoviesNotFound()
         data = []
         for movie in self.movies:
             data.append(movie.getMovieInfo())
 
-        df = pd.DataFrame(data, columns=["影片", "年份", "片源", "分辨率", "发布方", "文件类型", "文件大小", "导演", "主演", "豆瓣评分", "评分人数", "豆瓣链接"])
+        df = pd.DataFrame(data, columns=movie.getMovieInfoName())
         df.to_csv(root + "test.csv", encoding="utf-8", index=False)
 
 
