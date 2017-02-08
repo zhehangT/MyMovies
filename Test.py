@@ -1,12 +1,21 @@
 # ---coding:utf-8---
+import os
+import shutil
 
-import cPickle
-
-
-
-f2 = open("moviesNotFound.pkl", "rb")
-p2 = cPickle.load(f2)
+s = os.sep
+movieRoot = "E:" + s + u"IMDB" + s
 
 
+# filename = u"007大战皇家赌场.Casino.Royale.2006.BDRip.x264.2Audio.AAC.miniSD-TLF.mkv"
+# i = filename.find(".")
+# name = filename[:i]
+# os.mkdir(movieRoot+name)
+# shutil.move(movieRoot+filename, movieRoot+name)
 
-print p2
+
+for filename in os.listdir(movieRoot):
+    if os.path.isfile(movieRoot+filename):
+        i = filename.find(".")
+        name = filename[:i]
+        os.mkdir(movieRoot+name)
+        shutil.move(movieRoot+filename, movieRoot+name)

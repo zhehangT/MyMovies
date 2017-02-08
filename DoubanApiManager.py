@@ -48,7 +48,7 @@ class DoubanApiManager:
             if os.path.exists(os.path.join(root, name + ".json")):
                 html = open(os.path.join(root, name + ".json")).read()
                 hjson = json.loads(html)
-                if not hjson["year"] == year.encode(encoding="UTF-8"):
+                if not self.check_year(hjson["year"], year.encode(encoding="UTF-8")):
                     html = self.get_info_json_from_name_and_year(root, name, year)
 
 
@@ -154,7 +154,7 @@ class DoubanApiManager:
 
     def check_year(self, year1, year2):
 
-        if  string.atoi(year2) - string.atoi(year1) <= 1:
+        if  abs(string.atoi(year2) - string.atoi(year1)) <= 1:
             return True
         else:
             return False

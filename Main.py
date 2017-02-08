@@ -7,7 +7,9 @@ from MovieManager import MovieManager
 import os
 
 s = os.sep
-movieRoot = "E:" + s + u"电影" + s
+# movieRoot = "E:" + s + u"电影" + s
+movieRoot = "E:" + s + u"IMDB" + s
+
 
 if __name__ == "__main__":
 
