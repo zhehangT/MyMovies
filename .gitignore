@@ -1,3 +1,4 @@
 moviesNotFound.pkl
 *.pyc
 /data
+/.idea
